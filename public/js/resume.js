@@ -1,7 +1,7 @@
 
 // -- -- GLOBAL VARIABLES -- --
 
-var userId = 1;
+var userId = 0;
 
 // -- -- EVENT HANDLERS -- --
 
@@ -27,6 +27,10 @@ $(document).on('click', '.save-btn', function(){
 
 	var currentCard = $(this).data().value;
 	var newData = $('#'+currentCard).serializeArray();
+
+	if(currentCard === 'skills'){
+		newData[0].value = $('#skills-area').val().replace(/\n/g,"<br>");
+	}
 
 	console.log('put data')
 	console.log(newData);
@@ -114,7 +118,7 @@ function refreshUser(){
 
 		.done(function(data){
 
-			if(data===null){
+			if(data.Name===''){
 				
 				$('#user-card').html(`
 
@@ -132,7 +136,7 @@ function refreshUser(){
 
 										<div class="row">
 											<div class="input-field col s12">
-												<input id="info-fullname" name="Name" type="text" class="validate">
+												<input id="info-fullname" name="Name" value="${data.firstname + ' ' +data.lastname}" type="text" class="validate">
 												<label for="info-fullname">Full Name</label>
 											</div>
 										</div>
@@ -161,7 +165,7 @@ function refreshUser(){
 
 										<div class="row">
 											<div class="input-field col s6">
-												<input id="info-email" name="Email" type="text" class="validate">
+												<input id="info-email" name="Email" type="text" value="${data.Email}" class="validate">
 												<label for="info-email">Email Address</label>
 											</div>
 											<div class="input-field col s6">
@@ -171,7 +175,7 @@ function refreshUser(){
 										</div>
 						
 										<div class="row">
-											<a class="waves-effect waves-light right create-btn btn" data-value="user"><i class="material-icons right">done</i>Save</a>
+											<a class="waves-effect waves-light right save-btn btn" data-value="user"><i class="material-icons right">done</i>Save</a>
 										</div>
 
 									</form>
@@ -515,7 +519,7 @@ function refreshSkills(){
 
 									<div class="row">
 										<div class="input-field col s12">
-											<textarea name="Skills" class="materialize-textarea"></textarea>
+											<textarea id="skills-area" name="Skills" class="materialize-textarea"></textarea>
 				          		<label>Skills</label>
 										</div>
 									</div>
@@ -551,7 +555,7 @@ function refreshSkills(){
 
 								<div class="row">
 									<div class="input-field col s12">
-										<textarea name="Skills" class="materialize-textarea">${data[0].Skills}</textarea>
+										<textarea id="skills-area" name="Skills" class="materialize-textarea">${data[0].Skills}</textarea>
 			          		<label>Skills</label>
 									</div>
 								</div>
@@ -571,25 +575,29 @@ function refreshSkills(){
 	})
 };
 
-// -- -- MAIN LOGIC -- --
+// -- -- MAIN LOGIC / INITIALIZATION-- --
 
-console.log('data');
+//gets session id and initializes page
+$.get("/sessionUserId")
+.done(function(data){
+		// console.log("auth:")
+		// console.log(data);
+		userId = data[0].id;
+		console.log(userId);
 
-$.get("/api/resume/"+userId)
+		//creates a resume in db if none exists
+		$.get("/api/resume/"+userId)
+		.done(function(data){
+			if(data.length === 0){
+				$.post("/api/resume/"+userId)
+			}
+			console.log(data);
+		})
 
-	.done(function(data){
+	//populates forms	
+	refreshUser();
+	refreshEducation();
+	refreshEmployment();
+	refreshSkills();
 
-		if(data.length === 0){
-
-			$.post("/api/resume/"+userId)
-
-		}
-
-		console.log(data);
-
-	})
-
-refreshUser();
-refreshEducation();
-refreshEmployment();
-refreshSkills();
+})
