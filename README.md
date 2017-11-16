@@ -9,7 +9,7 @@ Each user will sign up for res.create by inputting their email address and creat
 
 ## Deployed
 
-res.create is deployed through Heroku. View the application [here.] (https://res-create.herokuapp.com/)
+res.create is deployed through Heroku. View the application [here.](https://res-create.herokuapp.com/)
 
 #### Developers:
 * Taiwo Tejuosho
